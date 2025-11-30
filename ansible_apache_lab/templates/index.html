@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home - {{ owner_name }}</title>
+
+  <!-- Leaflet CSS (zonder integrity/crossorigin) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 1.5rem; }
+    header { margin-bottom: 1rem; }
+    #map { height: 450px; max-width: 100%; border: 1px solid #ddd; border-radius: 6px; }
+    .meta { color: #444; margin-top: .5rem; }
+    a.osm-link { font-size: .9rem; color: inherit; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welkom — {{ owner_name }}</h1>
+    <div class="meta">
+      <strong>Woonplaats:</strong> {{ hometown }}<br />
+      <strong>Datum:</strong> {{ ansible_date_time.date }} {{ ansible_date_time.time }}
+    </div>
+  </header>
+
+  <section>
+    <h2>Locatie op de kaart</h2>
+
+    <!-- Container voor de kaart -->
+    <div id="map" aria-label="Kaart van {{ hometown }}"></div>
+
+    <p>
+      <a class="osm-link" href="https://www.openstreetmap.org/#map=13/{{ hometown_lat }}/{{ hometown_lon }}" target="_blank">
+        Bekijk {{ hometown }} op OpenStreetMap (grote kaart)
+      </a>
+    </p>
+  </section>
+
+  <!-- Leaflet JS (zonder integrity/crossorigin) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const lat = {{ hometown_lat | default('0') }};
+    const lon = {{ hometown_lon | default('0') }};
+    const placeName = "{{ hometown | escape }}";
+    const ownerName = "{{ owner_name | escape }}";
+
+    const map = L.map('map').setView([lat, lon], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const marker = L.marker([lat, lon]).addTo(map);
+    marker.bindPopup(`<strong>${ownerName}</strong><br>${placeName}`).openPopup();
+  </script>
+</body>
+</html>
