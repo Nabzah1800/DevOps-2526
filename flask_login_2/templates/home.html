@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="card">
+    <h1>Welkom, {{ firstname }} {{ lastname }} 👋</h1>
+    <p class="muted">Je bent nu ingelogd als {{ username }}.</p>
+    <p>Het is nu: {{ now }}</p>
+    <p>Jouw IP-adres is: {{ user_ip }}</p>
+
+    <form method="POST" action="{{ url_for('logout') }}">
+      <button type="submit" class="secondary">Logout</button>
+    </form>
+  </div>
+</body>
+</html>
