@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build Docker image') {
+            steps {
+                script {
+                    dir('flask_login_2') {
+                        sh 'docker build -t flask-login-app:latest .'
+                    }
+                }
+            }
+        }
+        stage('Stop & Remove old container') {
+            steps {
+                script {
+                    sh 'docker stop flask-login-app || true'
+                    sh 'docker rm flask-login-app || true'
+                }
+            }
+        }
+        stage('Run container') {
+            steps {
+                script {
+                    sh '''
+                    docker run -d \
+                        --name flask-login-app \
+                        -p 5000:5000 \
+                        --restart unless-stopped \
+                        flask-login-app:latest
+                    '''
+                }
+            }
+        }
+    }
+}
