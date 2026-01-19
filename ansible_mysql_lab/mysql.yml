@@ -1,0 +1,63 @@
+---
+- name: Install and configure MySQL server
+  hosts: webservers
+  become: yes
+  
+  vars:
+    mysql_root_password: "SecurePassword123!"
+    database_name: "myapp_db"
+    database_user: "webapp"
+    database_password: "WebApp123!"
+  
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        
+    - name: Install MySQL server and dependencies
+      apt:
+        name:
+          - mysql-server
+          - python3-pymysql
+        state: present
+        
+    - name: Start MySQL service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+        
+    - name: Set MySQL root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
+      ignore_errors: yes
+        
+    - name: Create application database
+      mysql_db:
+        name: "{{ database_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        
+    - name: Create database user
+      mysql_user:
+        name: "{{ database_user }}"
+        password: "{{ database_password }}"
+        priv: "{{ database_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        
+    - name: Display database information
+      debug:
+        msg:
+          - "MySQL server installed successfully!"
+          - "Database: {{ database_name }}"
+          - "User: {{ database_user }}"
+          - "Connect with: mysql -u {{ database_user }} -p{{ database_password }} {{ database_name }}"
